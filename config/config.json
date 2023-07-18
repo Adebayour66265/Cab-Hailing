@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "glopilot",
+    "password": "Glopilot123@",
+    "database": "glopilot_dev",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "glopilot",
+    "password": "Glopilot123@",
+    "database": "glopilot_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "glopilot",
+    "password": "Glopilot123@",
+    "database": "glopilot",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}
