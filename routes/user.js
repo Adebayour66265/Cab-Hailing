@@ -13,8 +13,9 @@ router.get('/google/callback', google.authenticate('google', { failureRedirect: 
 })
 
 router.get('/facebook', facebook.authenticate('facebook', { scope: ['profile'] }));
-router.get('/facebook/callback', facebook.authenticate('facebook', { failureRedirect: '/login' }), function (req, res) {
-    res.redirect('/');
+router.get('/facebook/callback', facebook.authenticate('facebook', { session: false, failureRedirect: '/login' }), function (req, res) {
+    const token = jwt.sign({ email: req.user.email }, process.env.JWT_SECRET, { expiresIn: '1h' })
+    res.json({ user: req.user, token })
 })
 
 router.get('/apple', apple.authenticate('apple', { scope: ['profile'] }));
