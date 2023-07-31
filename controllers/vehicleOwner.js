@@ -67,6 +67,7 @@ const deleteVehicle = async (req, res) => {
 const getVehicles = async (req, res) => {
     try{
         const vehicles = await Vehicle.find({owner: req.user._id})
+        if(!vehicles) return res.status(404).json({message: "No vehicles found"})
         res.status(200).json({message: 'success', vehicles})
     } catch (error){
         console.log(error)
@@ -74,4 +75,15 @@ const getVehicles = async (req, res) => {
     }
 }
 
-module.exports = { addCar, addScooter, editVehicle, deleteVehicle }
+const getVehicle = async (req, res) => {
+    try{
+        const vehicle = await Vehicle.findById(req.params.id)
+        if(!vehicle) return res.status(404).json({message: "Vehicle not found"})
+        res.status(200).json({message: 'success', vehicle})
+    } catch (error){
+        console.log(error)
+        res.status(500).json({message: error.message})
+    }
+}
+
+module.exports = { addCar, addScooter, editVehicle, deleteVehicle, getVehicles, getVehicle }
