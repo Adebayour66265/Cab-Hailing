@@ -11,26 +11,21 @@ const io = new Server(server);
 
 app.use(morgan("dev"));
 app.use(bodyParser.json());
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "POST", "DELETE", "UPDATE", "PUT", "PATCH"],
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "Origin",
-      "x-access-token",
-      "X-Requested-With",
-      "Accept",
-      "Access-Control-Allow-Headers",
-      "Access-Control-Request-Headers",
-      "Access-Control-Allow-Origin",
-      "Access-Control-Allow-Methods",
-      "Access-Control-Allow-Credentials",
-    ],
-  })
-);
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors(
+    {
+        origin: '*',
+        methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'x-access-token', 'X-Requested-With', 'Accept', 'Access-Control-Allow-Headers', 'Access-Control-Request-Headers', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Methods', 'Access-Control-Allow-Credentials'],
+    }
+));
+app.use(bodyParser.urlencoded({ extended: true}));
+
+connectDB()
+app.get('/', (req, res) => {
+    res.send('Hello World');
+})
+app.use('/', require('./routes/user'))
+app.use('/vehicle', require('./routes/owner'))
 
 connectDB();
 app.get("/", (req, res) => {
