@@ -16,10 +16,13 @@ const vehicleSchema = new Schema({
         type: String,
         required: true
     },
+    pickUpDate:{
+        type: Date,
+    },
     seats: {
         type: Number,
         required: true,
-        min: 1,
+        default: 1
     },
     picture: {
         type: String,
@@ -31,7 +34,22 @@ const vehicleSchema = new Schema({
     },
     dropOffLocation: {
         type: [Number], // [longitude, latitude]
-    }
+    },
+    price: {
+        type: Number,
+    },
+    isAvailable: {
+        type: Boolean,
+        default: true
+    },
+    isApproved: {
+        type: Boolean,
+        default: false
+    },
+    qrCode:{
+        type: String,
+        required: true
+    },
 });
 
 const Vehicle = mongoose.model('Vehicle', vehicleSchema);
