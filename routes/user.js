@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 const { facebook, google, apple } = require('../controllers/userOauth')
 const { register, verifyEmail, resendOtp, login, forgotPassword, resetPassword } = require('../controllers/userAuth')
 const { authorizeUser, verifyUser } = require('../middlewares/authorize')
-const { getCars, getCar, getScooters, getScooter, rentCar, rentScooter, rentCar, rentScooter, getRentals, getRental } = require('../controllers/userRental')
+const { getCars, getCar, getScooters, getScooter, rentScooter, rentCar, getRentals, getRental } = require('../controllers/userRental')
 
 router.get('/google', google.authenticate('google', { scope: ['profile', 'email'] }));
 router.get('/google/callback', google.authenticate('google', { failureRedirect: '/login', session: false }), function (req, res) {
@@ -30,7 +30,6 @@ router.post('/resend-otp', authorizeUser, resendOtp)
 router.post('/login', verifyUser, login)
 router.post('/forgot-password', verifyUser, forgotPassword)
 router.post('/reset-password', resetPassword)
-
 router.get('/cars', authorizeUser, getCars)
 router.get('/cars/:id', authorizeUser, getCar)
 router.get('/scooters', authorizeUser, getScooters)
@@ -39,5 +38,6 @@ router.post('/cars/:id/rent', authorizeUser, rentCar)
 router.post('/scooters/:id/rent', authorizeUser, rentScooter)
 router.get('/rentals', authorizeUser, getRentals)
 router.get('/rentals/:id', authorizeUser, getRental)
+
 
 module.exports = router

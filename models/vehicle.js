@@ -45,7 +45,11 @@ const vehicleSchema = new Schema({
     isApproved: {
         type: Boolean,
         default: false
-    }
+    },
+    qrCode:{
+        type: String,
+        required: true
+    },
 });
 
 const Vehicle = mongoose.model('Vehicle', vehicleSchema);
