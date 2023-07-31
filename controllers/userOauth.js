@@ -41,15 +41,16 @@ exports.google = passport.use(new GoogleStrategy({
 
 // Facebook
 exports.facebook = passport.use(new FacebookStrategy({
-    clientID: 'YOUR_FACEBOOK_CLIENT_ID',
-    clientSecret: 'YOUR_FACEBOOK_CLIENT_SECRET',
-    callbackURL: 'http://www.yourwebsite.com/auth/facebook/callback'
+    clientID: process.env.FACEBOOK_APP_ID,
+    clientSecret: process.env.FACEBOOK_APP_SECRET,
+    callbackURL: 'http://localhost:5000/facebook/callback',
+    profileFields: ['id', 'emails', 'name', 'photos']
 }, function (accessToken, refreshToken, profile, done) {
     User.findOne({ facebookId: profile.id }).then(function (existingUser) {
         if (existingUser) {
             done(null, existingUser);
         } else {
-            new User({ facebookId: profile.id }).save().then(function (user) {
+            new User({ facebookId: profile.id, email: profile.emails[0].value, name: profile.name.givenName + ' ' + profile.name.familyName}).save().then(function (user) {
                 done(null, user);
             });
         }
@@ -60,7 +61,7 @@ exports.facebook = passport.use(new FacebookStrategy({
 exports.apple = passport.use(new AppleStrategy({
     clientID: 'YOUR_APPLE_SERVICES_ID',
     teamID: 'YOUR_APPLE_TEAM_ID',
-    callbackURL: 'http://www.yourwebsite.com/auth/apple/callback',
+    callbackURL: 'http://localhost:5000/apple/callback',
     keyID: 'YOUR_APPLE_KEY_ID',
     privateKeyLocation: 'path_to_your_private_key.pem'
 }, function (accessToken, refreshToken, profile, done) {

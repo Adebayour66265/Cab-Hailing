@@ -21,6 +21,7 @@ app.get('/', (req, res) => {
     res.send('Hello World');
 })
 app.use('/', require('./routes/user'))
+app.use('/vehicle', require('./routes/owner'))
 
 app.listen(process.env.PORT, () => {
     console.log('Server is running on port ' + process.env.PORT);

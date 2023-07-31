@@ -24,7 +24,7 @@ const UserSchema = new mongoose.Schema({
     },
     userType: {
         type: String,
-        enum: ['rider', 'driver', 'hotelOwner', 'shortLetOwner', 'foodDelivery', 'carOwner', 'scooterOwner'],
+        enum: ['rider', 'driver', 'hotelOwner', 'shortletOwner', 'foodVendor', 'carOwner', 'scooterOwner'],
         required: true,
         default: 'rider'
     },
