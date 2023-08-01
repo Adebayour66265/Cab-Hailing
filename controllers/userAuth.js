@@ -175,4 +175,15 @@ const resetPassword = async (req, res) => {
     }
 }
 
-module.exports = { register, verifyEmail, resendOtp, login, forgotPassword, resetPassword }
+const getFcmToken = async (req, res) => {
+    try{
+        const fcmToken = req.params.fcmToken
+        req.user.fcmToken = fcmToken
+        req.user.save()
+        res.status(200).json({message: "FCM Token saved successfully" })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: error.message })
+    }
+}
+module.exports = { register, verifyEmail, resendOtp, login, forgotPassword, resetPassword, getFcmToken }

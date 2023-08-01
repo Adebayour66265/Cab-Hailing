@@ -93,9 +93,14 @@ const UserSchema = new mongoose.Schema({
     },
     passwordResetOtp: {
         type: String,
-    }, passwordResetExpires: {
+    }, 
+    passwordResetExpires: {
         type: Date
-    }
+    },
+    fcmToken:{
+        type: String,
+    },
+    
 }, { timestamps: true });
 
 const User = mongoose.model('User', UserSchema);

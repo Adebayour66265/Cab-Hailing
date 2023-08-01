@@ -1,5 +1,6 @@
 const Rental = require('../models/rental')
 const Vehicle = require('../models/vehicle')
+const admin = require('firebase-admin')
 
 const getCars = async (req, res) => {
     try {
@@ -59,7 +60,17 @@ const rentCar = async (req, res) => {
             dropOffDate: dropOffDate
         })
         await rental.save()
-        res.status(201).json({ message: 'success', rental })
+        const message = {
+            notification: {
+                title: 'New Rental Request',
+                body: `${req.user.name} has requested to rent your vehicle`
+            },
+            token: vehicle.owner.fcmToken
+        }
+        admin.messaging().send(message).then((response) => {
+            console.log("Notification sent successfully", response)
+            res.status(201).json({ message: 'success', rental })
+        })
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: error.message })
@@ -79,7 +90,17 @@ const rentScooter = async (req, res) => {
             dropOffDate: dropOffDate
         })
         await rental.save()
-        res.status(201).json({ message: 'success', rental })
+        const message = {
+            notification: {
+                title: 'New Rental Request',
+                body: `${req.user.name} has requested to rent your vehicle`
+            },
+            token: vehicle.owner.fcmToken
+        }
+        admin.messaging().send(message).then((response) => {
+            console.log("Notification sent successfully", response)
+            res.status(201).json({ message: 'success', rental })
+        })
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: error.message })
@@ -108,5 +129,36 @@ const getRental = async (req, res) => {
     }
 }
 
-module.exports = {getCars, getCar, getScooters, getScooter, rentCar, rentScooter,rentCar, rentScooter, getRentals, getRental }
+const axios = require('axios');
+
+const lockVehicle = async (req, res) => {
+    const vehicleId = req.params.id;
+
+    try {
+        const vehicle = await Vehicle.findById(vehicleId);
+        if (!vehicle) return res.status(404).json({ message: 'Vehicle not found' })
+        await axios.post(`https://iotdeviceapi.com/api/lock/${vehicleId}`);
+        res.status(200).send({ status: 'success', message: 'Vehicle locked successfully' });
+    } catch (error) {
+        console.error('Error locking vehicle:', error);
+        res.status(500).send({ status: 'error', message: 'Error locking vehicle' });
+    }
+};
+
+const unlockVehicle = async (req, res) => {
+    const vehicleId = req.params.id;
+
+    try {
+        const vehicle = await Vehicle.findById(vehicleId);
+        if (!vehicle) return res.status(404).json({ message: 'Vehicle not found' })
+        await axios.post(`https://iotdeviceapi.com/api/unlock/${vehicleId}`);
+        res.status(200).send({ status: 'success', message: 'Vehicle unlocked successfully' });
+    } catch (error) {
+        console.error('Error unlocking vehicle:', error);
+        res.status(500).send({ status: 'error', message: 'Error unlocking vehicle' });
+    }
+};
+
+
+module.exports = { getCars, getCar, getScooters, getScooter, rentCar, rentScooter, rentCar, rentScooter, getRentals, getRental, lockVehicle, unlockVehicle }
 

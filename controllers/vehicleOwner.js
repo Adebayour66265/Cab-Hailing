@@ -1,6 +1,7 @@
 const Vehicle = require('../models/vehicle')
 const QRCode = require('qrcode')
 const Rental = require('../models/rental')
+const admin = require('firebase-admin')
 
 const addCar = async (req, res) => {
     try {
@@ -114,6 +115,53 @@ const getRental = async (req, res) => {
     }
 }
 
+const acceptRental = async (req, res) => {
+    try {
+        const rental = await Rental.findById(req.params.id)
+        if (!rental) return res.status(404).json({ message: 'No rental found' })
+        rental.status = 'accepted'
+        await rental.save()
+        const message = {
+            notification: {
+                title: 'Rental Accepted',
+                body: 'Your rental has been accepted by the car owner'
+            },
+            token: rental.user.deviceToken
+        }
+        await admin.messaging().send(message).then((response) => {
+            console.log("Notification sent successfully", response)
+            res.status(200).json({ message: 'success', rental })
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: error.message })
+    }
+}
+
+const rejectRental = async (req, res) => {
+    try {
+        const rental = await Rental.findById(req.params.id)
+        if (!rental) return res.status(404).json({ message: 'No rental found' })
+        rental.status = 'rejected'
+        await rental.save()
+        const message = {
+            notification: {
+                title: 'Rental rejected',
+                body: 'Your rental has been rejected by the car owner'
+            },
+            token: rental.user.deviceToken
+        }
+        admin.messaging().send(message).then((response) => {
+            console.log("Notification sent successfully", response)
+            res.status(200).json({ message: 'success', rental })
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: error.message })
+    }
+}
 
 
-module.exports = { addCar, addScooter, editVehicle, deleteVehicle, getVehicles, getVehicle, getMyRentals, getRental }
+
+
+module.exports = { addCar, addScooter, editVehicle, deleteVehicle, getVehicles, getVehicle, getMyRentals, getRental, acceptRental, rejectRental }
