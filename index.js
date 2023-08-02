@@ -6,6 +6,10 @@ const bodyParser = require('body-parser');
 const connectDB = require('./config/db');
 const admin = require('firebase-admin');
 const serviceAccount = require('./utils/service-account');
+const http = require('http');
+const socketIO = require('socket.io');
+const server = http.createServer(app);
+const io = socketIO(server);
 
 app.use(morgan('dev'))
 app.use(bodyParser.json());
@@ -22,7 +26,7 @@ connectDB()
 if (admin.apps.length === 0) {
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
-        databaseURL: 'https://<PROJECT_ID>.firebaseio.com'
+        databaseURL: 'https://glopilot.firebaseio.com'
     });
 }
 app.get('/', (req, res) => {
@@ -30,6 +34,7 @@ app.get('/', (req, res) => {
 })
 app.use('/', require('./routes/user'))
 app.use('/vehicle', require('./routes/owner'))
+
 
 app.listen(process.env.PORT, () => {
     console.log('Server is running on port ' + process.env.PORT);

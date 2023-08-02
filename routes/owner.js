@@ -16,3 +16,4 @@ router.post('/rental/:id', authorizeOwner, acceptRental)
 router.post('/rental/:id', authorizeOwner, rejectRental)
 
 module.exports = router
+
