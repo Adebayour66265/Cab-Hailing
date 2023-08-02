@@ -39,7 +39,7 @@ router.post('/scooters/:id/rent', authorizeUser, rentScooter)
 router.get('/rentals', authorizeUser, getRentals)
 router.get('/rentals/:id', authorizeUser, getRental)
 router.post('/fcm-token', authorizeUser, getFcmToken)
-router.post('/lock-vehicle/:id', authorizeUser, lockVehicle)
-router.post('/unlock-vehicle/:id', authorizeUser, unlockVehicle)
+router.post('/lock-vehicle/', authorizeUser, lockVehicle)
+router.post('/unlock-vehicle/', authorizeUser, unlockVehicle)
 
 module.exports = router

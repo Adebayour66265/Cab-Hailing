@@ -164,4 +164,7 @@ const rejectRental = async (req, res) => {
 
 
 
+
+
+
 module.exports = { addCar, addScooter, editVehicle, deleteVehicle, getVehicles, getVehicle, getMyRentals, getRental, acceptRental, rejectRental }

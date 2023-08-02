@@ -1,6 +1,9 @@
 const Rental = require('../models/rental')
 const Vehicle = require('../models/vehicle')
 const admin = require('firebase-admin')
+const axios = require('axios')
+const jimp = require('jimp')
+const jsqr = require('jsqr')
 
 const getCars = async (req, res) => {
     try {
@@ -129,36 +132,40 @@ const getRental = async (req, res) => {
     }
 }
 
-const axios = require('axios');
+async function scanQrCode(image) {
+    const img = await Jimp.read(image);
+    const decoded = jsQR(img.bitmap.data, img.bitmap.width, img.bitmap.height);
+    return decoded && decoded.data;
+}
+
 
 const lockVehicle = async (req, res) => {
-    const vehicleId = req.params.id;
-
     try {
-        const vehicle = await Vehicle.findById(vehicleId);
-        if (!vehicle) return res.status(404).json({ message: 'Vehicle not found' })
-        await axios.post(`https://iotdeviceapi.com/api/lock/${vehicleId}`);
-        res.status(200).send({ status: 'success', message: 'Vehicle locked successfully' });
+        const qrCodeImage = req.body.qrCodeImage;
+        const qrCodeData = await scanQrCode(qrCodeImage);
+        const vehicle = await Vehicle.findOne({ qrCode: qrCodeData })
+        if (!vehicle) return res.status(404).json({ message: "Vehicle not found" })
+        const response = await axios.post('http://hardware-api.com/lock', { vehicleId: vehicle.id });
+        res.status(200).json({ message: "vehicle locked" })
     } catch (error) {
-        console.error('Error locking vehicle:', error);
-        res.status(500).send({ status: 'error', message: 'Error locking vehicle' });
+        console.log(error)
+        res.status(500).json({ message: "Failed to lock vehicle" + error.message })
     }
-};
+}
 
 const unlockVehicle = async (req, res) => {
-    const vehicleId = req.params.id;
-
     try {
-        const vehicle = await Vehicle.findById(vehicleId);
-        if (!vehicle) return res.status(404).json({ message: 'Vehicle not found' })
-        await axios.post(`https://iotdeviceapi.com/api/unlock/${vehicleId}`);
-        res.status(200).send({ status: 'success', message: 'Vehicle unlocked successfully' });
+        const qrCodeImage = req.body.qrCodeImage;
+        const qrCodeData = await scanQrCode(qrCodeImage);
+        const vehicle = await Vehicle.findOne({ qrCode: qrCodeData })
+        if (!vehicle) return res.status(404).json({ message: "Vehicle not found" })
+        const response = await axios.post('http://hardware-api.com/unlock', { vehicleId: vehicle.id });
+        res.status(200).json({ message: "vehicle unlocked" })
     } catch (error) {
-        console.error('Error unlocking vehicle:', error);
-        res.status(500).send({ status: 'error', message: 'Error unlocking vehicle' });
+        console.log(error)
+        res.status(500).json({ message: "Failed to unlock vehicle" + error.message })
     }
-};
-
+}
 
 module.exports = { getCars, getCar, getScooters, getScooter, rentCar, rentScooter, rentCar, rentScooter, getRentals, getRental, lockVehicle, unlockVehicle }
 

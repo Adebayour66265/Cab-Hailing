@@ -50,6 +50,10 @@ const vehicleSchema = new Schema({
         type: String,
         required: true
     },
+    lock: {
+        type: Boolean,
+        
+    }
 });
 
 const Vehicle = mongoose.model('Vehicle', vehicleSchema);
