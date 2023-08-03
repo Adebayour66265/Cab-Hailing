@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require("express");
 const app = express();
 const cors = require('cors');
 const morgan = require('morgan')
@@ -6,13 +6,15 @@ const bodyParser = require('body-parser');
 const connectDB = require('./config/db');
 const admin = require('firebase-admin');
 const serviceAccount = require('./utils/service-account');
+const RequestRide = require("./models/requestRide");
 const http = require('http');
 const socketIO = require('socket.io');
 const server = http.createServer(app);
 const io = socketIO(server);
 
-app.use(morgan('dev'))
+app.use(morgan("dev"));
 app.use(bodyParser.json());
+
 app.use(cors(
     {
         origin: '*',
@@ -35,7 +37,52 @@ app.get('/', (req, res) => {
 app.use('/', require('./routes/user'))
 app.use('/vehicle', require('./routes/owner'))
 
-app.listen(process.env.PORT, () => {
-    console.log('Server is running on port ' + process.env.PORT);
-})
+connectDB();
+app.get("/", (req, res) => {
+  res.send("Hello World");
+});
+app.use("/", require("./routes/user"));
 
+io.on("connection", (socket) => {
+  socket.on("ride request", async (args) => {
+    try {
+      const rr = new RequestRide({
+        userId: args.userId,
+        vehicleId: args.vehicleId,
+        requestType: args.requestType,
+        status: args.status,
+        pickupLocation: { type: "Point", coordinates: args.pickupLocation },
+        dropoffLocation: { type: "Point", coordinates: args.dropoffLocation },
+        paymentMethod: args.paymentMethod,
+        totalCost: args.totalCost,
+        additionalFees: args.additionalFees,
+      });
+      await rr.save();
+      socket.emit("ride request success", { success: true });
+    } catch (error) {
+      socket.emit("ride request failed", { error: error.message });
+    }
+  });
+  socket.on("get ride requests", async (args) => {
+    try {
+      const nearbyRequests = await RequestRide.find({
+        pickupLocation: {
+          $near: {
+            $geometry: {
+              type: "Point",
+              coordinates: [args.longitude, args.latitude],
+            },
+            $maxDistance: args.maxDistance,
+          },
+        },
+      });
+      socket.emit("nearbyRideRequests", { requests: nearbyRequests });
+    } catch (error) {
+      socket.emit("nearbyRideRequestsError", { error: error.message });
+    }
+  });
+});
+
+app.listen(process.env.PORT, () => {
+  console.log("Server is running on port " + process.env.PORT);
+});
