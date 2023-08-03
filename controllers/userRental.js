@@ -1,5 +1,9 @@
 const Rental = require('../models/rental')
 const Vehicle = require('../models/vehicle')
+const admin = require('firebase-admin')
+const axios = require('axios')
+const jimp = require('jimp')
+const jsqr = require('jsqr')
 
 const getCars = async (req, res) => {
     try {
@@ -59,7 +63,17 @@ const rentCar = async (req, res) => {
             dropOffDate: dropOffDate
         })
         await rental.save()
-        res.status(201).json({ message: 'success', rental })
+        const message = {
+            notification: {
+                title: 'New Rental Request',
+                body: `${req.user.name} has requested to rent your vehicle`
+            },
+            token: vehicle.owner.fcmToken
+        }
+        admin.messaging().send(message).then((response) => {
+            console.log("Notification sent successfully", response)
+            res.status(201).json({ message: 'success', rental })
+        })
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: error.message })
@@ -79,7 +93,17 @@ const rentScooter = async (req, res) => {
             dropOffDate: dropOffDate
         })
         await rental.save()
-        res.status(201).json({ message: 'success', rental })
+        const message = {
+            notification: {
+                title: 'New Rental Request',
+                body: `${req.user.name} has requested to rent your vehicle`
+            },
+            token: vehicle.owner.fcmToken
+        }
+        admin.messaging().send(message).then((response) => {
+            console.log("Notification sent successfully", response)
+            res.status(201).json({ message: 'success', rental })
+        })
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: error.message })
@@ -108,5 +132,40 @@ const getRental = async (req, res) => {
     }
 }
 
-module.exports = {getCars, getCar, getScooters, getScooter, rentCar, rentScooter,rentCar, rentScooter, getRentals, getRental }
+async function scanQrCode(image) {
+    const img = await Jimp.read(image);
+    const decoded = jsQR(img.bitmap.data, img.bitmap.width, img.bitmap.height);
+    return decoded && decoded.data;
+}
+
+
+const lockVehicle = async (req, res) => {
+    try {
+        const qrCodeImage = req.body.qrCodeImage;
+        const qrCodeData = await scanQrCode(qrCodeImage);
+        const vehicle = await Vehicle.findOne({ qrCode: qrCodeData })
+        if (!vehicle) return res.status(404).json({ message: "Vehicle not found" })
+        const response = await axios.post('http://hardware-api.com/lock', { vehicleId: vehicle.id });
+        res.status(200).json({ message: "vehicle locked" })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: "Failed to lock vehicle" + error.message })
+    }
+}
+
+const unlockVehicle = async (req, res) => {
+    try {
+        const qrCodeImage = req.body.qrCodeImage;
+        const qrCodeData = await scanQrCode(qrCodeImage);
+        const vehicle = await Vehicle.findOne({ qrCode: qrCodeData })
+        if (!vehicle) return res.status(404).json({ message: "Vehicle not found" })
+        const response = await axios.post('http://hardware-api.com/unlock', { vehicleId: vehicle.id });
+        res.status(200).json({ message: "vehicle unlocked" })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: "Failed to unlock vehicle" + error.message })
+    }
+}
+
+module.exports = { getCars, getCar, getScooters, getScooter, rentCar, rentScooter, rentCar, rentScooter, getRentals, getRental, lockVehicle, unlockVehicle }
 
