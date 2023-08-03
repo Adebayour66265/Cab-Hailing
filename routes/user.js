@@ -3,9 +3,9 @@ const router = express.Router()
 const jwt = require('jsonwebtoken')
 
 const { facebook, google, apple } = require('../controllers/userOauth')
-const { register, verifyEmail, resendOtp, login, forgotPassword, resetPassword } = require('../controllers/userAuth')
+const { register, verifyEmail, resendOtp, login, forgotPassword, resetPassword, getFcmToken  } = require('../controllers/userAuth')
 const { authorizeUser, verifyUser } = require('../middlewares/authorize')
-const { getCars, getCar, getScooters, getScooter, rentScooter, rentCar, getRentals, getRental } = require('../controllers/userRental')
+const { getCars, getCar, getScooters, getScooter, rentScooter, rentCar, getRentals, getRental, lockVehicle, unlockVehicle } = require('../controllers/userRental')
 
 router.get('/google', google.authenticate('google', { scope: ['profile', 'email'] }));
 router.get('/google/callback', google.authenticate('google', { failureRedirect: '/login', session: false }), function (req, res) {
@@ -38,6 +38,8 @@ router.post('/cars/:id/rent', authorizeUser, rentCar)
 router.post('/scooters/:id/rent', authorizeUser, rentScooter)
 router.get('/rentals', authorizeUser, getRentals)
 router.get('/rentals/:id', authorizeUser, getRental)
-
+router.post('/fcm-token', authorizeUser, getFcmToken)
+router.post('/lock-vehicle/', authorizeUser, lockVehicle)
+router.post('/unlock-vehicle/', authorizeUser, unlockVehicle)
 
 module.exports = router
