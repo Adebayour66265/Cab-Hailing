@@ -132,6 +132,12 @@ const acceptRental = async (req, res) => {
             console.log("Notification sent successfully", response)
             res.status(200).json({ message: 'success', rental })
         })
+        const rentalRoom = io.of(`/rental/${rentalId}`);
+        rentalRoom.on('connection', (socket) => {
+            socket.on('message', (msg) => {
+                socket.broadcast.emit('message', msg);
+            });
+        });
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: error.message })
