@@ -13,13 +13,13 @@ const register = async (req, res) => {
         const otp = Math.floor(1000 + Math.random() * 9000)
         const otpExpires = Date.now() + 360000
         const token = jwt.sign({ email: email }, process.env.JWT_SECRET, { expiresIn: otpExpires })
-
         const newUser = new User({
             name: name,
             email: email,
             password: hashedPassword,
             userType: userType,
             otp: otp.toString(),
+            referralLink: Math.random().toString(36).slice(2, 8).toUpperCase(),
         })
         await newUser.save()
         const transporter = nodemailer.createTransport({

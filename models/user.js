@@ -24,7 +24,7 @@ const UserSchema = new mongoose.Schema({
     },
     userType: {
         type: String,
-        enum: ['rider', 'driver', 'hotelOwner', 'shortletOwner', 'foodVendor', 'carOwner', 'scooterOwner'],
+        enum: ['rider', 'driver', 'propertyOwner', 'foodVendor', 'carOwner', 'scooterOwner'],
         required: true,
         default: 'rider'
     },
@@ -100,7 +100,15 @@ const UserSchema = new mongoose.Schema({
     fcmToken:{
         type: String,
     },
-    
+    referralLink:{
+        type: String,
+    },
+    referrals:[
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }
+    ],
 }, { timestamps: true });
 
 const User = mongoose.model('User', UserSchema);
