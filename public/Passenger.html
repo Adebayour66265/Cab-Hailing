@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Passenger</title>
+</head>
+<body>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    // Replace 'passengerId' with the actual passenger ID from your database
+    const passengerId = 'your-passenger-id';
+
+    // Function to send messages to the other party (driver)
+    function sendMessage(receiverId, message) {
+      socket.emit('sendMessage', { senderId: passengerId, receiverId, message });
+    }
+
+    // Sample usage to send a message to the driver (replace 'D1' with the actual driver ID)
+    sendMessage('D1', 'Hello, driver!');
+
+    // Listen for chat
