@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Driver</title>
+  </head>
+  <body>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+
+      const driverId = "your-driver-id";
+
+      // Function to send location updates to the server
+      function sendLocation(latitude, longitude) {
+        socket.emit("updateLocation", {
+          driverId,
+          location: [latitude, longitude],
+        });
+      }
+
+      // Function to send messages to the other party (passenger)
+      function sendMessage(receiverId, message) {
+        socket.emit("sendMessage", { senderId: driverId, receiverId, message });
+      }
+
+      // Sample usage to demonstrate location updates (you can integrate this with your GPS or map API)
+      // sending location (latitude, longitude)
+      sendLocation(37.7749, -122.4194);
+
+      // Send a message to the passenger (replace 'P1' with the actual passenger ID)
+      sendMessage("P1", "Hello, passenger!");
+
+      // Listen for real-time driver location updates from the server
+      socket.on("driverLocationUpdate", (data) => {
+        const { driverId, location } = data;
+        console.log(`Driver ID ${driverId} updated location:`, location);
+        // Update driver's location on the map or handle as needed
+      });
+
+      // Listen for chat messages from the server
+      socket.on("chatMessage", (data) => {
+        const { senderId, message } = data;
+        console.log(`Message from ${senderId}:`, message);
+        // Handle the incoming message as needed
+      });
+    </script>
+  </body>
+</html>
