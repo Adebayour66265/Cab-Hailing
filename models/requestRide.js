@@ -12,6 +12,11 @@ const requestRide = new Schema({
     ref: "Vehicle",
     required: true,
   },
+  driverId: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
   requestType: {
     type: String,
     enum: ["car", "tricycle"],
