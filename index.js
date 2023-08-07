@@ -96,7 +96,88 @@ io.on("connection", (socket) => {
       socket.emit("nearbyRideRequestsError", { error: error.message });
     }
   });
+  socket.on("rejectRideRequest", async (data) => {
+    try {
+      // Find the ride request by ID and update its status to "rejected"
+      const rejectedRequest = await RideRequest.findById(data.requestId);
+      rejectedRequest.rejectedBy = [
+        ...rejectedRequest.rejectedBy,
+        data.driverId,
+      ];
+      await rejectedRequest.save();
+
+      if (!rejectedRequest) {
+        // Notify the driver if the request ID was not found
+        socket.emit("rejectRideRequestError", {
+          error: "Ride request not found.",
+        });
+        return;
+      }
+
+      // Fetch nearby requests after rejecting to refresh the driver's list
+      const nearbyRequests = await fetchNearbyRequests(
+        data.latitude,
+        data.longitude
+      );
+      socket.emit("nearbyRideRequests", { requests: nearbyRequests });
+    } catch (err) {
+      // Notify the driver about any errors
+      socket.emit("rejectRideRequestError", {
+        error: "Error rejecting the ride request.",
+      });
+    }
+  });
+  socket.on("acceptRideRequest", async (data) => {
+    try {
+      // Find the ride request by ID and update its status to "accepted"
+      const acceptedRequest = await RideRequest.findByIdAndUpdate(
+        data.requestId,
+        { status: "accepted", driverId: data.driverId },
+        { new: true }
+      );
+
+      if (!acceptedRequest) {
+        // Notify the driver if the request ID was not found
+        socket.emit("acceptRideRequestError", {
+          error: "Ride request not found.",
+        });
+        return;
+      }
+
+      // Notify the passenger that the request was accepted
+      const passengerSocketId = await findPassengerSocketId(
+        acceptedRequest.userId
+      );
+      if (passengerSocketId) {
+        io.to(passengerSocketId).emit("rideRequestAccepted", {
+          message: "Ride request accepted!",
+        });
+      }
+
+      // Fetch nearby requests after accepting to refresh the driver's list
+      const nearbyRequests = await fetchNearbyRequests(
+        data.latitude,
+        data.longitude
+      );
+      socket.emit("nearbyRideRequests", { requests: nearbyRequests });
+    } catch (err) {
+      // Notify the driver about any errors
+      socket.emit("acceptRideRequestError", {
+        error: "Error accepting the ride request.",
+      });
+    }
+  });
 });
+async function findPassengerSocketId(passengerId) {
+  const passengers = await io.allSockets();
+  for (const socketId of passengers) {
+    const socket = io.sockets.sockets.get(socketId);
+    if (socket && socket.request.session.userId === passengerId) {
+      return socketId;
+    }
+  }
+  return null;
+}
 
 app.use("/delivery", deliveryRoutes);
 app.use("/chat", chatRoutes);
