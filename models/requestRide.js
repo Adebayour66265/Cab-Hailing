@@ -63,6 +63,19 @@ const requestRide = new Schema({
     type: Number,
     required: true,
   },
+  location: {
+    type: {
+      type: String,
+      ref: "Driver",
+      required: true,
+    },
+
+    coordinates: {
+      type: [Number],
+      required: true,
+    },
+  },
+  socketId: String,
 });
 
 const RequestRide = mongoose.model("RequestRide", requestRide);

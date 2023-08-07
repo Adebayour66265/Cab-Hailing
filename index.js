@@ -7,6 +7,9 @@ const connectDB = require("./config/db");
 const admin = require("firebase-admin");
 const serviceAccount = require("./utils/service-account");
 const RequestRide = require("./models/requestRide");
+const errorHandling = require("./middleware/errorHandling");
+const deliveryRoutes = require("./routes/deliveryRoutes");
+const chatRoutes = require("./routes/chatRoutes");
 const http = require("http");
 const socketIO = require("socket.io");
 const server = http.createServer(app);
@@ -175,6 +178,10 @@ async function findPassengerSocketId(passengerId) {
   }
   return null;
 }
+
+app.use("/delivery", deliveryRoutes);
+app.use("/chat", chatRoutes);
+app.use(errorHandling);
 
 app.listen(process.env.PORT, () => {
   console.log("Server is running on port " + process.env.PORT);
