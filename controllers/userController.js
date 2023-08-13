@@ -1,6 +1,5 @@
 // controllers/userController.js
 const User = require("../models/User");
-
 // Register a new user (customer or driver)
 exports.registerUser = async (req, res) => {
   try {
