@@ -10,6 +10,8 @@ const driverRoutes = require("./routes/drivers");
 const rideRequestRoutes = require("./routes/rideRequests");
 const chatRoutes = require("./routes/chat");
 const adminRoutes = require("./routes/admin");
+const userRoutes = require("./routes/userRoutes");
+const deliveryRoutes = require("./routes/deliveryRoutes");
 
 const app = express();
 const server = http.createServer(app);
@@ -37,12 +39,15 @@ app.use(
 );
 // ... Set up other middleware
 
+// Routes
+
 // app.use(i18nMiddleware);
 app.use("/drivers", driverRoutes);
 app.use("/ride-requests", rideRequestRoutes);
 app.use("/chat", chatRoutes);
 app.use("/admin", adminRoutes);
-
+app.use("/users", userRoutes);
+app.use("/deliveries", deliveryRoutes);
 // ... Set up other configurations
 connectDB();
 
